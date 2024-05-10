@@ -1,0 +1,378 @@
+{# tutorial/templates/tutorial/people.html #}
+<!doctype html>
+{% load render_table from django_tables2 %}
+{% load bootstrap3 %}
+{% load django_tables2 %}
+{% bootstrap_css %}
+{% load static %}
+
+
+
+<html>
+    <head>
+        <title>Fluids-Programs </title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            .menu{
+                display: block;
+                position: fixed;
+                width: 100%;
+                top: 0;
+            }
+            .dropdown{
+                display: inline-block;
+                width: 22%;
+                vertical-align: top;
+            }
+            .account{
+                display: inline-block;
+                width: 10%;
+                vertical-align: top;
+            }
+            .dropdown-label{
+                background-color: gray;
+                color: white;
+                padding: 5px;
+                font-family: sans-serif;
+                text-align: center;
+            }
+            .dropdown-content a{
+                display: block;
+                color: black;
+                padding: 5px;
+                text-decoration: none;
+                font-family: sans-serif;
+                background-color: white;
+            }
+            .dropdown-content{
+                display: none;
+            }
+            .dropdown-content a:hover{
+                background-color: #ddd;
+            }
+
+            .dropdown:hover .dropdown-content {display: block;}
+            .menu-space{height: 35px;}
+
+            #program_dropdown{
+                display: inline-block;
+                position: absolute;
+                vertical-align: top;
+                background-color: white;
+
+            }
+            #program_dropdown button{
+                display: block;
+                font-family: sans-serif;
+                width: 100%;
+                color: black;
+                text-align: left;
+            }
+            #program_dropdown button:hover{
+                background-color: #ddd;
+            }
+
+            #fluid_dropdown{
+                display: inline-block;
+                position: absolute;
+                vertical-align: top;
+                background-color: white;
+
+            }
+            #fluid_dropdown button{
+                display: block;
+                font-family: sans-serif;
+                width: 100%;
+                color: black;
+                text-align: left;
+            }
+            #fluid_dropdown button:hover{
+                background-color: #ddd;
+            }
+
+
+
+            #program_dropdown_filter{
+                display: inline-block;
+                position: absolute;
+                vertical-align: top;
+                background-color: white;
+
+            }
+            #program_dropdown_filter button{
+                display: block;
+                font-family: sans-serif;
+                width: 100%;
+                color: black;
+                text-align: left;
+            }
+            #program_dropdown_filter button:hover{
+                background-color: #ddd;
+            }
+
+            #fluid_dropdown_filter{
+                display: inline-block;
+                position: absolute;
+                vertical-align: top;
+                background-color: white;
+
+            }
+            #fluid_dropdown_filter button{
+                display: block;
+                font-family: sans-serif;
+                width: 100%;
+                color: black;
+                text-align: left;
+            }
+            #fluid_dropdown_filter button:hover{
+                background-color: #ddd;
+            }
+            .filter, .add{
+                border-style: solid;
+                border-color: black;
+                border-width: 2px;
+            }
+        
+        </style>
+    </head>
+    <body>
+        {%if user.is_authenticated%}
+        <div class = "menu-space"></div>
+        <div class = "menu">
+            <div class="dropdown">
+                <div class="dropdown-label">Daily Operations</div>
+                <div class="dropdown-content">
+                    <a href="{% url 'test' %}">Tests</a>
+                    <a href="{% url 'dut' %}">DUTs</a>
+                    <a href="{% url 'Harness' %}">Harnesses</a>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <div class="dropdown-label">Program Information</div>
+                <div class="dropdown-content">
+                    <a href="{% url 'product' %}">Products</a>
+                    <a href="{% url 'program' %}">Programs</a>
+                    <a href="{% url 'TestMap' %}">Test Maps</a>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <div class="dropdown-label">Equipment Information</div>
+                <div class="dropdown-content">
+                    <a href="{% url 'Chamber' %}">Chambers</a>
+                    <a href="{% url 'Dar' %}">DARs</a>
+                    <a href="{% url 'cage' %}">Cages</a>
+                    <a href="{% url 'Laptop' %}">Laptops</a>
+                    <a href="{% url 'Fluid' %}">Test Fluids</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <div class="dropdown-label">Other</div>
+                <div class="dropdown-content">
+                    <a href="{% url 'Lab' %}">Labs</a>
+                    <a href="{% url 'Technician' %}">Technicians</a>
+                    <a href="{% url 'TestType' %}">Add new test type</a>
+                    <a href="{% url 'hours calculations' %}">Program Hours Calculator</a>
+                </div>
+            </div>
+            <div class = "account">
+                <div class="nav-item">
+                    <a class="nav-link" href="{% url 'Logout' %}">Logout</a>
+                </div>
+            </div>
+        </div>   
+        <div class = 'filter'>
+        {% if filter %}
+            <form action="" method="get" class="form-inline">
+                {% bootstrap_form filter.form layout='inline'%}
+                {% bootstrap_button 'filter' %}
+            </form>
+        {% endif %}
+        <div>
+            <label for="search_program_filter">Search for Program:</label>
+            <input type ="text" id="search_program_filter" onkeyup="search_program_filter()">
+            <div id = "program_dropdown_filter">
+            </div>
+        </div>
+        <div>
+            <label for="search_fluid_filter">Search for Test Fluid:</label>
+            <input type ="text" id="search_fluid_filter" onkeyup="search_fluid_filter()">
+            <div id = "fluid_dropdown_filter">
+            </div>
+        </div>
+        </div>
+        {% load crispy_forms_tags %}
+
+        <div class  = 'add'>
+            <!--Django Model Form-->
+            <h2 class="my-4">Add a new item</h2>
+
+            <form action="" method="post">
+              {% csrf_token %}
+                  {{form}}
+                  <button class="btn btn-primary my-4" onclick="clicked(event)" type="submit">Submit</button>
+            </form>
+            <div>
+                <label for="search_program">Search for Program:</label>
+                <input type ="text" id="search_program" onkeyup="search_program()">
+                <div id = "program_dropdown">
+                </div>
+            </div>
+            <div>
+                <label for="search_fluid">Search for Test Fluid:</label>
+                <input type ="text" id="search_fluid" onkeyup="search_fluid()">
+                <div id = "fluid_dropdown">
+                </div>
+            </div>
+        </div>
+            {% render_table table  "django_tables2/bootstrap.html"%} 
+
+            {%else%}
+            <div class="nav-item">
+                <a class="nav-link" href="{% url 'Login' %}">Login</a>
+            </div>
+        {%endif%}
+        
+
+       
+        <script>
+            function clicked(e)
+                {
+                    if(!confirm('Are you sure?')) {
+                        e.preventDefault();
+                    }
+                }
+            var table, rows 
+            table = document.getElementsByTagName("table").item(0);
+            rows = table.rows;
+             
+            for (let i = 1; i < rows.length ; i++){
+                x = rows[i].getElementsByTagName("td")[6];
+                y = x.getElementsByClassName("btn")[0];
+                y.onclick = function clicked(e)
+                {
+                    if(!confirm('Are you sure?')) {
+                        e.preventDefault();
+                    }
+                };
+            }
+            
+            
+            function select_program(event){
+                document.getElementsByName("program_id")[1].value=event.target.value
+            }
+
+
+            function search_program(){
+                parent = document.getElementById("program_dropdown")
+                parent.innerHTML=""
+                text = document.getElementById("search_program").value.toLowerCase()
+                
+                if (text==""){
+                    return
+                }
+                list = document.getElementsByName("program_id")[1]
+                console.log(list)
+                options = list.getElementsByTagName("option")
+                for (let i =0; i<options.length;i++){
+                    if (options[i].innerHTML.toLowerCase().includes(text)){
+                        value = options[i].value
+                        newDiv = document.createElement("button")
+                        newDiv.value = value
+                        newDiv.innerHTML = options[i].innerHTML
+                        parent.append(newDiv)
+                        newDiv.addEventListener("click", select_program)
+                    }
+                }
+            }
+
+            function select_fluid(event){
+                document.getElementsByName("fluid_id")[1].value=event.target.value
+            }
+
+
+            function search_fluid(){
+                parent = document.getElementById("fluid_dropdown")
+                parent.innerHTML=""
+                text = document.getElementById("search_fluid").value.toLowerCase()
+                
+                if (text==""){
+                    return
+                }
+                list = document.getElementsByName("fluid_id")[1]
+                console.log(list)
+                options = list.getElementsByTagName("option")
+                for (let i =0; i<options.length;i++){
+                    if (options[i].innerHTML.toLowerCase().includes(text)){
+                        value = options[i].value
+                        newDiv = document.createElement("button")
+                        newDiv.value = value
+                        newDiv.innerHTML = options[i].innerHTML
+                        parent.append(newDiv)
+                        newDiv.addEventListener("click", select_fluid)
+                    }
+                }
+            }
+
+
+
+
+            function select_program_filter(event){
+                document.getElementsByName("program_id")[0].value=event.target.value
+            }
+
+
+            function search_program_filter(){
+                parent = document.getElementById("program_dropdown_filter")
+                parent.innerHTML=""
+                text = document.getElementById("search_program_filter").value.toLowerCase()
+                
+                if (text==""){
+                    return
+                }
+                list = document.getElementsByName("program_id")[0]
+                console.log(list)
+                options = list.getElementsByTagName("option")
+                for (let i =0; i<options.length;i++){
+                    if (options[i].innerHTML.toLowerCase().includes(text)){
+                        value = options[i].value
+                        newDiv = document.createElement("button")
+                        newDiv.value = value
+                        newDiv.innerHTML = options[i].innerHTML
+                        parent.append(newDiv)
+                        newDiv.addEventListener("click", select_program_filter)
+                    }
+                }
+            }
+
+            function select_fluid_filter(event){
+                document.getElementsByName("fluid_id")[0].value=event.target.value
+            }
+
+
+            function search_fluid_filter(){
+                parent = document.getElementById("fluid_dropdown_filter")
+                parent.innerHTML=""
+                text = document.getElementById("search_fluid_filter").value.toLowerCase()
+                
+                if (text==""){
+                    return
+                }
+                list = document.getElementsByName("fluid_id")[0]
+                console.log(list)
+                options = list.getElementsByTagName("option")
+                for (let i =0; i<options.length;i++){
+                    if (options[i].innerHTML.toLowerCase().includes(text)){
+                        value = options[i].value
+                        newDiv = document.createElement("button")
+                        newDiv.value = value
+                        newDiv.innerHTML = options[i].innerHTML
+                        parent.append(newDiv)
+                        newDiv.addEventListener("click", select_fluid_filter)
+                    }
+                }
+            }
+        </script>
+    </body>
+</html>

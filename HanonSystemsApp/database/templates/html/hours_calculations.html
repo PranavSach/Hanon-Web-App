@@ -1,0 +1,148 @@
+<!doctype html>
+{% load static %}
+<html>
+    <head>
+        <title>Hours Calculation</title>
+        <link rel="stylesheet"  href="{% static 'database/hours_calculations.css' %}"> 
+        <style>
+            .menu{
+                display: block;
+                position: fixed;
+                width: 100%;
+                top: 0;
+            }
+            .dropdown{
+                display: inline-block;
+                width: 20%;
+                vertical-align: top;
+            }
+            .dropdown-label{
+                background-color: gray;
+                color: white;
+                padding: 5px;
+                font-family: sans-serif;
+                text-align: center;
+            }
+            .dropdown-content a{
+                display: block;
+                color: black;
+                padding: 5px;
+                text-decoration: none;
+                font-family: sans-serif;
+                background-color: white;
+            }
+            .dropdown-content{
+                display: none;
+            }
+            .dropdown-content a:hover{
+                background-color: #ddd;
+            }
+
+            .dropdown:hover .dropdown-content {display: block;}
+            .menu-space{height: 35px;}
+            .account{
+                display: inline-block;
+                width: 10%;
+                vertical-align: top;
+            }
+        </style>
+    </head>
+    <body>
+        {%if user.is_authenticated%}
+        <div class = "menu-space"></div>
+        <div class = "menu">
+            <div class="dropdown">
+                <div class="dropdown-label">Daily Operations</div>
+                <div class="dropdown-content">
+                    <a href="{% url 'test' %}">Tests</a>
+                    <a href="{% url 'dut' %}">DUTs</a>
+                    <a href="{% url 'Harness' %}">Harnesses</a>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <div class="dropdown-label">Program Information</div>
+                <div class="dropdown-content">
+                    <a href="{% url 'product' %}">Products</a>
+                    <a href="{% url 'program' %}">Programs</a>
+                    <a href="{% url 'TestMap' %}">Test Maps</a>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <div class="dropdown-label">Equipment Information</div>
+                <div class="dropdown-content">
+                    <a href="{% url 'Chamber' %}">Chambers</a>
+                    <a href="{% url 'Dar' %}">DARs</a>
+                    <a href="{% url 'cage' %}">Cages</a>
+                    <a href="{% url 'Laptop' %}">Laptops</a>
+                    <a href="{% url 'Fluid' %}">Test Fluids</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <div class="dropdown-label">Other</div>
+                <div class="dropdown-content">
+                    <a href="{% url 'Lab' %}">Labs</a>
+                    <a href="{% url 'Technician' %}">Technicians</a>
+                    <a href="{% url 'TestType' %}">Add new test type</a>
+                    <a href="{% url 'hours calculations' %}">Program Hours Calculator</a>
+                </div>
+            </div>
+            <div class = "account">
+                <div class="nav-item">
+                    <a class="nav-link" href="{% url 'Logout' %}">Logout</a>
+                </div>
+            </div>
+        </div>    
+        <label for="start">Start date:</label>
+        <input type="date" id="start"/>
+
+        <label for="end">End date:</label>
+        <input type="date" id="end"/>
+
+        <button id="calculate" onclick="calculate()"> Calculate </button>
+
+        {%else%}
+            <div class="nav-item">
+                <a class="nav-link" href="{% url 'Login' %}">Login</a>
+            </div>
+        {%endif%}
+        <script>
+            function getCookie(name) {
+                var cookieValue = null;
+                    if (document.cookie && document.cookie !== '') {
+                        var cookies = document.cookie.split(';');
+                        for (var i = 0; i < cookies.length; i++) {
+                            var cookie = cookies[i].trim();
+                            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                break;
+                            }
+                        }
+                    }
+                return cookieValue;
+            }
+            
+            function calculate(){
+                var start, end;
+                start = document.getElementById("start").value;
+                end = document.getElementById("end").value;
+                console.log(start);
+                console.log(end);
+
+                if(start==""||end==""){
+                    alert("Start and/or End date has not been entered.")
+                    return;
+                }
+                var csrftoken = getCookie('csrftoken');
+
+                fetch("http://10.22.137.40:8000/database/calculate", {method: "POST", body: `${start},${end}`, headers:{"X-CSRFToken": csrftoken}})
+                .then(()=>window.location.replace("http://10.22.137.40:8000/database/hours_download")
+                )
+                .catch(()=>{alert("An error occurred, please check the values entered")})    
+            }
+
+            
+        </script>
+    </body>
+</html>

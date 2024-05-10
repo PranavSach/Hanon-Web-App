@@ -1,0 +1,384 @@
+{# tutorial/templates/tutorial/people.html #}
+<!doctype html>
+{% load render_table from django_tables2 %}
+{% load bootstrap3 %}
+{% load django_tables2 %}
+{% bootstrap_css %}
+{% load static %}
+
+
+
+<html>
+    <head>
+        <title>Tests-DUTs </title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            .menu{
+                display: block;
+                position: fixed;
+                width: 100%;
+                top: 0;
+            }
+            .dropdown{
+                display: inline-block;
+                width: 22%;
+                vertical-align: top;
+            }
+            .account{
+                display: inline-block;
+                width: 10%;
+                vertical-align: top;
+            }
+            .dropdown-label{
+                background-color: gray;
+                color: white;
+                padding: 5px;
+                font-family: sans-serif;
+                text-align: center;
+            }
+            .dropdown-content a{
+                display: block;
+                color: black;
+                padding: 5px;
+                text-decoration: none;
+                font-family: sans-serif;
+                background-color: white;
+            }
+            .dropdown-content{
+                display: none;
+            }
+            .dropdown-content a:hover{
+                background-color: #ddd;
+            }
+
+            .dropdown:hover .dropdown-content {display: block;}
+            .menu-space{height: 35px;}
+
+            #test_dropdown{
+                display: inline-block;
+                position: absolute;
+                vertical-align: top;
+                background-color: white;
+
+            }
+            #test_dropdown button{
+                display: block;
+                font-family: sans-serif;
+                width: 100%;
+                color: black;
+                text-align: left;
+            }
+            #test_dropdown button:hover{
+                background-color: #ddd;
+            }
+
+            #dut_dropdown{
+                display: inline-block;
+                position: absolute;
+                vertical-align: top;
+                background-color: white;
+
+            }
+            #dut_dropdown button{
+                display: block;
+                font-family: sans-serif;
+                width: 100%;
+                color: black;
+                text-align: left;
+            }
+            #dut_dropdown button:hover{
+                background-color: #ddd;
+            }
+
+
+
+            #test_dropdown_filter{
+                display: inline-block;
+                position: absolute;
+                vertical-align: top;
+                background-color: white;
+
+            }
+            #test_dropdown_filter button{
+                display: block;
+                font-family: sans-serif;
+                width: 100%;
+                color: black;
+                text-align: left;
+            }
+            #test_dropdown_filter button:hover{
+                background-color: #ddd;
+            }
+
+            #dut_dropdown_filter{
+                display: inline-block;
+                position: absolute;
+                vertical-align: top;
+                background-color: white;
+
+            }
+            #dut_dropdown_filter button{
+                display: block;
+                font-family: sans-serif;
+                width: 100%;
+                color: black;
+                text-align: left;
+            }
+            #dut_dropdown_filter button:hover{
+                background-color: #ddd;
+            }
+            .filter, .add{
+                border-style: solid;
+                border-color: black;
+                border-width: 2px;
+            }
+        
+        </style>
+    </head>
+    <body>
+        {%if user.is_authenticated%}
+        <div class = "menu-space"></div>
+        <div class = "menu">
+            <div class="dropdown">
+                <div class="dropdown-label">Daily Operations</div>
+                <div class="dropdown-content">
+                    <a href="{% url 'test' %}">Tests</a>
+                    <a href="{% url 'dut' %}">DUTs</a>
+                    <a href="{% url 'Harness' %}">Harnesses</a>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <div class="dropdown-label">Program Information</div>
+                <div class="dropdown-content">
+                    <a href="{% url 'product' %}">Products</a>
+                    <a href="{% url 'program' %}">Programs</a>
+                    <a href="{% url 'TestMap' %}">Test Maps</a>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <div class="dropdown-label">Equipment Information</div>
+                <div class="dropdown-content">
+                    <a href="{% url 'Chamber' %}">Chambers</a>
+                    <a href="{% url 'Dar' %}">DARs</a>
+                    <a href="{% url 'cage' %}">Cages</a>
+                    <a href="{% url 'Laptop' %}">Laptops</a>
+                    <a href="{% url 'Fluid' %}">Test Fluids</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <div class="dropdown-label">Other</div>
+                <div class="dropdown-content">
+                    <a href="{% url 'Lab' %}">Labs</a>
+                    <a href="{% url 'Technician' %}">Technicians</a>
+                    <a href="{% url 'TestType' %}">Add new test type</a>
+                    <a href="{% url 'hours calculations' %}">Program Hours Calculator</a>
+                </div>
+            </div>
+            <div class = "account">
+                <div class="nav-item">
+                    <a class="nav-link" href="{% url 'Logout' %}">Logout</a>
+                </div>
+            </div>
+        </div>   
+        <div class = filter>
+        {% if filter %}
+            <form action="" method="get" class="form-inline">
+                {% bootstrap_form filter.form layout='inline'%}
+                {% bootstrap_button 'filter' %}
+            </form>
+        {% endif %}
+        
+        
+        <div>
+            <label for="search_test_filter">Search for Test:</label>
+            <input type ="text" id="search_test_filter" onkeyup="search_test_filter()">
+            <div id = "test_dropdown_filter">
+            </div>
+        </div>
+        <div>
+            <label for="search_dut_filter">Search for DUT:</label>
+            <input type ="text" id="search_dut_filter" onkeyup="search_dut_filter()">
+            <div id = "dut_dropdown_filter">
+            </div>
+        </div>
+        </div>
+        {% load crispy_forms_tags %}
+
+        <div class = "add">
+                        <!--Django Model Form-->
+            <h2 class="my-4">Add a new item</h2>
+
+            <form action="" method="post">
+              {% csrf_token %}
+                  {{form}}
+                  <button class="btn btn-primary my-4" onclick="clicked(event)" type="submit">Submit</button>
+            </form>
+            <div>
+                <label for="search_test">Search for Test:</label>
+                <input type ="text" id="search_test" onkeyup="search_test()">
+                <div id = "test_dropdown">
+                </div>
+            </div>
+            <div>
+                <label for="search_dut">Search for DUT:</label>
+                <input type ="text" id="search_dut" onkeyup="search_dut()">
+                <div id = "dut_dropdown">
+                </div>
+            </div>
+
+        </div>
+            {% render_table table  "django_tables2/bootstrap.html"%} 
+
+        
+        
+
+            {%else%}
+            <div class="nav-item">
+                <a class="nav-link" href="{% url 'Login' %}">Login</a>
+            </div>
+        {%endif%}
+        <script>
+            function clicked(e)
+                {
+                    if(!confirm('Are you sure?')) {
+                        e.preventDefault();
+                    }
+                }
+            var table, rows 
+            table = document.getElementsByTagName("table").item(0);
+            rows = table.rows;
+             
+            for (let i = 1; i < rows.length ; i++){
+                x = rows[i].getElementsByTagName("td")[6];
+                y = x.getElementsByClassName("btn")[0];
+                y.onclick = function clicked(e)
+                {
+                    if(!confirm('Are you sure?')) {
+                        e.preventDefault();
+                    }
+                };
+            }
+            
+            
+            function select_test(event){
+                document.getElementsByName("test_id")[1].value=event.target.value
+            }
+
+
+            function search_test(){
+                parent = document.getElementById("test_dropdown")
+                parent.innerHTML=""
+                text = document.getElementById("search_test").value.toLowerCase()
+                
+                if (text==""){
+                    return
+                }
+                list = document.getElementsByName("test_id")[1]
+                options = list.getElementsByTagName("option")
+                for (let i =0; i<options.length;i++){
+                    if (options[i].innerHTML.toLowerCase().includes(text)){
+                        value = options[i].value
+                        newDiv = document.createElement("button")
+                        newDiv.value = value
+                        newDiv.innerHTML = options[i].innerHTML
+                        parent.append(newDiv)
+                        newDiv.addEventListener("click", select_test)
+                    }
+                }
+            }
+
+            function select_dut(event){
+                document.getElementsByName("dut_id")[1].value=event.target.value
+            }
+
+
+            function search_dut(){
+                parent = document.getElementById("dut_dropdown")
+                parent.innerHTML=""
+                text = document.getElementById("search_dut").value.toLowerCase()
+                
+                if (text==""){
+                    return
+                }
+                list = document.getElementsByName("dut_id")[1]
+                options = list.getElementsByTagName("option")
+                for (let i =0; i<options.length;i++){
+                    if (options[i].innerHTML.toLowerCase().includes(text)){
+                        value = options[i].value
+                        newDiv = document.createElement("button")
+                        newDiv.value = value
+                        newDiv.innerHTML = options[i].innerHTML
+                        parent.append(newDiv)
+                        newDiv.addEventListener("click", select_dut)
+                    }
+                }
+            }
+            
+
+
+
+
+
+
+
+
+
+
+            function select_test_filter(event){
+                document.getElementsByName("test_id")[0].value=event.target.value
+            }
+
+
+            function search_test_filter(){
+                parent = document.getElementById("test_dropdown_filter")
+                parent.innerHTML=""
+                text = document.getElementById("search_test_filter").value.toLowerCase()
+                
+                if (text==""){
+                    return
+                }
+                list = document.getElementsByName("test_id")[0]
+                options = list.getElementsByTagName("option")
+                for (let i =0; i<options.length;i++){
+                    if (options[i].innerHTML.toLowerCase().includes(text)){
+                        value = options[i].value
+                        newDiv = document.createElement("button")
+                        newDiv.value = value
+                        newDiv.innerHTML = options[i].innerHTML
+                        parent.append(newDiv)
+                        newDiv.addEventListener("click", select_test_filter)
+                    }
+                }
+            }
+
+            function select_dut_filter(event){
+                document.getElementsByName("dut_id")[0].value=event.target.value
+            }
+
+
+            function search_dut_filter(){
+                parent = document.getElementById("dut_dropdown_filter")
+                parent.innerHTML=""
+                text = document.getElementById("search_dut_filter").value.toLowerCase()
+                
+                if (text==""){
+                    return
+                }
+                list = document.getElementsByName("dut_id")[0]
+                options = list.getElementsByTagName("option")
+                for (let i =0; i<options.length;i++){
+                    if (options[i].innerHTML.toLowerCase().includes(text)){
+                        value = options[i].value
+                        newDiv = document.createElement("button")
+                        newDiv.value = value
+                        newDiv.innerHTML = options[i].innerHTML
+                        parent.append(newDiv)
+                        newDiv.addEventListener("click", select_dut_filter)
+                    }
+                }
+            }
+        </script>
+    </body>
+</html>
